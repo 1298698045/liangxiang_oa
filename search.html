@@ -377,8 +377,8 @@
                             $("#div_loading").hide();
                             LoadDataSuccess = true;
                             pageHtml = "<div id='paging' style='text-align:right;font-size:16px;'>";
-                            pageHtml += "<a style='cursor:pointer;'><span onclick='LoadPrePageData();'>上一页</span></a>";
-                            pageHtml += "<a style='cursor:pointer'><span style='margin:6px;' onclick='LoadNextPageData();'>下一页</span></a>";
+                            pageHtml += "<a style='cursor:pointer;' onclick='LoadPrePageData();'><span>上一页</span></a>";
+                            pageHtml += "<a style='cursor:pointer'  onclick='LoadNextPageData();'><span style='margin:6px;'>下一页</span></a>";
                             pageHtml += "<span id='CurrentPageNumber'><span></span><input id='pageto'autocomplete='off' type='text'></span>";
                             pageHtml += "<span id='TotalPageNumber'></span>";
                             pageHtml += "</div>";
@@ -642,6 +642,12 @@
             let val = $('.search input').val();
             LoadInfo.contentList(1)
         }
+        $('.search input').keydown(function (e) {
+            if (e.keyCode == 13) {
+                var val = $('.search input').val();
+                LoadInfo.contentList(1)
+            }
+        })
     </script>
 </body>
 </html>
