@@ -1,0 +1,647 @@
+﻿﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1,minimum-scale=1">
+    <title>文章列表</title>
+    <link href="/portal/css/portal.css" rel="stylesheet" />
+    <link href="/css/tablist/frame.css" type="text/css" rel="stylesheet" charset="utf-8">
+    <link href="/css/tablist/login_v5.css" type="text/css" rel="stylesheet" charset="utf-8">
+    <link href="/css/tablist/skin.css" type="text/css" rel="stylesheet" id="skin_style">
+    <link href="/portal/css/viewArticle.css" rel="stylesheet" />
+    <script src="/js/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/moment.js"></script>
+    <script src="/js/ejs.min.js"></script>
+    <script src="/js/Business.js"></script>
+    <style>
+        #js_style_css_module_global_WB_outframe
+        {
+            height: 42px;
+        }
+
+        .tab_fix_bottom
+        {
+            position: absolute;
+            bottom: 0px;
+            top: auto;
+        }
+
+        .tab_fix
+        {
+            position: fixed;
+        }
+
+        .UG_list_b
+        {
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .list_title_b
+        {
+            font-size: 14px;
+        }
+
+        .time
+        {
+            float: right;
+        }
+
+        .loadings
+        {
+            display: none;
+            border-radius: 5px;
+            text-align: center;
+            line-height: 34px;
+            margin: 5px;
+            background: #F1F1F1;
+        }
+
+            .loadings img
+            {
+                margin-left: 50%;
+            }
+        body {
+            background-color:#f0f0f0 !important;
+        }
+        .a_span {
+            max-width:490px;
+            display:inline-block;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            float:left;
+            margin-right:5px;
+        }
+        .red {
+            font-weight:700;
+            color:red;
+            font-size:12px;
+        }
+        .search {
+            width:100%;
+            margin-bottom:30px;
+            overflow:hidden;
+            margin-left:90px;
+            float:none
+        }
+        .search input{
+            width: 400px;
+            height: 40px;
+            color: #333;
+            font-size: 14px;
+            border: 1px #ececec solid;
+            border-right: 0;
+            line-height: 38px;
+            padding-left: 10px;
+            background: #f9f9f9;
+            float: left;
+            border-radius: 1px 0 0 1px;
+            box-sizing: border-box;
+            outline:0;
+           
+        }
+        .search .search-btn{
+            float: left;
+            cursor: pointer;
+            width: 80px;
+            text-align:center;
+            line-height:40px;
+            height: 40px;
+            display: inline-block;
+            background: #538dec;
+            text-align: center;
+            border-radius: 0 1px 1px 0;
+            color:#fff;
+            text-decoration:unset!important;
+        }
+    </style>
+    <link href="/portal/css/home.css" rel="stylesheet" />
+
+    <script type="text/javascript">
+
+        var LikesNum = 0;
+        var DataPageNumber = 1;
+        var LoadDataSuccess = false;
+
+        var folderId = "";
+        var finished = 0;
+        var parentId = getQueryString("parentid");
+        var tokenStr = getQueryString("token");
+        if (!tokenStr) { tokenStr = "" }
+
+        $(function () {
+            $("#a_index").click(function () {
+                window.location = " /portal/index.html?tokenStr=" + tokenStr;
+            })
+
+            $.ajax({
+                url: "/apps/CommandProcessor.ashx?cmd=query.navigation",
+                type: 'get',
+                data: {
+
+                },
+                dataType: 'json',
+                async: true,
+                cache: false,
+                success: function (data) {
+                    //alert("1");
+                    /*
+                    $('#div_navigation').html(ejs.render($('#template_navigation').html(), data));
+                    $("div[node-type='sethome']").mouseover(function () {
+                        $(this).find("div").show();
+                    }).mouseout(function () { $(this).find("div").hide(); })
+                    
+                     var link= "/portal/index.html?token=" + tokenStr;
+                    $("#a2").attr("href",link );
+                    */
+
+                    if (tokenStr && tokenStr != "")
+                        $("#a2").attr("href", "/portal/index.html?token=" + tokenStr);
+
+                    if (!data.result) return;
+                    var MainColumn = data.result.MainColumn;
+                    var json = [];
+                    var parentid = getQueryString('parentid')
+                    var id = getQueryString('id')
+                    if (!id) {
+                        $('.location2name').html('')
+                    }
+                    for (var i = 0; i < MainColumn.length; i++) {
+                        json += '<div class="tn-title" node-type="sethome">';
+                        if (parentid == MainColumn[i].Value) {
+                            json += '<a href="/portal/newlist.html?parentid=' + MainColumn[i].Value + '" class="tn-tab active" id="a1">';
+                        } else {
+                            json += '<a href="/portal/newlist.html?parentid=' + MainColumn[i].Value + '" class="tn-tab" id="a1">';
+                        }
+
+                        json += '<i style="padding-left: 10px;"><span style="float:left;">' + MainColumn[i].Name + '</span><em class="tn-new tn-new2" style="display: none;"></em>';
+                        if (MainColumn[i].Item.length > 0) {
+                            json += '<span class="" style="float:left;margin-left:5px;margin-top:2px;"><img style="width:12px;height:12px;" src="/portal/img/12121.png"/></span></i>';
+
+                        }
+                        json += '</a>';
+                        if (parentid == MainColumn[i].Value) {
+                            $('.location1name').html(MainColumn[i].Name)
+                            $('.location3name').html(MainColumn[i].Name)
+                            $('.top-location-left').html(MainColumn[i].Name)
+                        }
+                        if (MainColumn[i].Item.length > 0) {
+                            json += ' <div style="display: none; z-index: 1000;" class="tn-topmenulist tn-topmenulist-a tn-topmenulist-a-client">';
+                            json += '<ul class="tn-text-list">';
+                            for (var t = 0; t < MainColumn[i].Item.length; t++) {
+                                if (parentid == MainColumn[i].Value) {
+                                    if (id == MainColumn[i].Item[t].Value) {
+                                        $('.location2name').html(MainColumn[i].Item[t].Name)
+                                    }
+                                }
+                                json += '<li style="cursor: pointer;"><a href="newlist.html?parentid=' + MainColumn[i].Value + '&id=' + MainColumn[i].Item[t].Value + "&token=" + tokenStr + '"' + ' target="_self">' + MainColumn[i].Item[t].Name + '</a></li>'
+                            }
+                            json += '</ul>';
+                            json += '</div>';
+                        }
+                        json += '</div>';
+                    }
+                    //debugger;
+                    //console.log(json);
+                    $('#div_navigation').append(json)
+                    $("div[node-type='sethome']").mouseover(function () {
+                        $(this).find("div").show();
+                    }).mouseout(function () { $(this).find("div").hide(); })
+
+                    //end
+                }
+            });
+            $.ajax({
+                url: "/apps/CommandProcessor.ashx?cmd=islogin",
+                type: 'get',
+                data: {
+                    token: tokenStr
+                },
+                dataType: 'json',
+                async: true,
+                cache: false,
+                success: function (data) {
+                    if (!tokenStr) {
+                        //logout();
+                        return;
+                    }
+                    if (tokenStr == "") {
+                        return;
+                    }
+                    if (data.IsLogin == 1) {
+                        //jQuery("#SI_Top_Login").hide();
+                        jQuery("#SI_Top_Login1").hide();
+                        $("#SI_Top_Logout1").show();
+                        // loadNotice();
+                    }
+                    else {
+
+                    }
+                }
+            });
+
+            //if (parentId) {
+            //    $.ajax({
+            //        url: "/apps/CommandProcessor.ashx?cmd=contentlikes.byfolderid.get",
+            //        type: 'get',
+            //        data: {
+            //            FolderId: parentId,
+            //            RowNum: LikesNum * 10
+            //        },
+            //        dataType: 'json',
+            //        async: true,
+            //        success: function (data) {
+            //            if (data.listData != null && data.listData.length > 0) {
+            //                $('#div_content').append(ejs.render($('#template_content').html(), data));
+            //                finished = 0;
+            //                $("#div_loading").hide();
+            //                LikesNum = LikesNum + 1;
+            //            } else {
+            //                $("#div_loading").html("已经到底了！");
+            //            }
+            //        }
+            //    });
+            //}
+
+
+            /*
+            $(window).scroll(function () {
+
+                if (finished == 0) {
+                    var contentH = $(document).height();    //内容高度
+                    var scrollH = $(this).scrollTop();    //滚动高度
+                    var viewH = $(this).height();    //可视高度
+                    if (contentH - viewH - scrollH < 50) {
+                        finished = 1;
+                        // $("#div_loading").html(" <img src='/js/portal/allfile/indicator_24.gif' /></a>");
+                        //  $("#div_loading").show();
+
+                        //setTimeout("LoadInfo.contentList(0)", 1000);//延时1秒
+
+                    }
+                }
+            });
+            */
+        });
+
+        LoadInfo = {
+            init: function () {
+                var _this = this;
+
+            },
+
+            bindClick: function () {
+                $('#leftNav a').click(function () {
+                    folderId = $(this).attr("valueid");
+                    window.data.FolderId = folderId
+                    //LikesNum = 0;
+                    $("#div_loading").hide();
+                    $('#div_content').html("");
+                    $('#leftNav a').removeClass('active')
+                    $(this).addClass('active')
+                    $('.location2name').html($(this).text())
+                    LoadInfo.contentList(1);
+                })
+
+            },
+
+            contentList: function (pageNumber) {
+                let val = $('.search input').val()
+                if (val!='') {
+                    window.data.title_filter = val;
+                }
+                window.data.pageNumber = DataPageNumber;
+                $.ajax({
+                    url: window.url,
+                    type: 'get',
+                    data: window.data,
+                    dataType: 'json',
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        //Total
+                        var listData = data.listData
+                        var pagecoutent = data.totalPages
+                        var data = {
+                            listData: listData
+                        }
+                        if (data.listData != null && data.listData.length > 0) {
+
+                            var totalPages = 0;
+                            var pageHtml = '';
+
+                            totalPages = pagecoutent
+                            
+
+                            $('#div_content').html('');
+                            for (var i = 0; i < data.listData.length; i++) {
+                                var res = data.listData[i]
+                                var CreatedOn = res.CreatedOn
+                                CreatedOn = CreatedOn.split(' ')[0]
+                                var ReadStatus = res.ReadStatus
+                                var Title = res.Title
+                                var ContentId = res.ContentId
+                                var location1name = $('.location1name').html()
+                                var location2name = $('.location2name').html()
+                                if (ReadStatus != 1) {
+                                    $('#div_content').append('<li class="UG_list_b">'
+                                    + '<p class="list_title_b">'
+                                    + '<i></i>'
+                                    + '<div class="list-skin"></div>'
+                                    + '<a class="S_txt1" href="viewArticle.aspx?id=' + ContentId + '&location1name=' + location1name + '&location2name=' + location2name + '&target="_blank"><span class="a_span">' + Title + '</span></a>'
+
+                                    + '<span class="time">' + CreatedOn + '</span>'
+                                    + '</p>'
+                                + '</li>');
+                                } else {
+                                    $('#div_content').append('<li class="UG_list_b">'
+                                    + '<p class="list_title_b">'
+                                    + '<i></i>'
+                                    + '<div class="list-skin"></div>'
+                                    + '<a class="S_txt1 is-read" href="viewArticle.aspx?id=' + ContentId + '&location1name=' + location1name + '&location2name=' + location2name + '&target="_blank"><span class="a_span">' + Title + '</span></a>'
+                                    + '<span class="time">' + CreatedOn + '</span>'
+                                    + '</p>'
+                                + '</li>');
+                                }
+
+                                //if (res.IsTop == 1) {
+                                //    $('.UG_list_b .S_txt1:last').append('<span class="red">[置顶]</span>')
+                                //}
+
+                                
+
+        
+                            }
+                            finished = 0;
+                            $("#div_loading").hide();
+                            LoadDataSuccess = true;
+                            pageHtml = "<div id='paging' style='text-align:right;font-size:16px;'>";
+                            pageHtml += "<a style='cursor:pointer;'><span onclick='LoadPrePageData();'>上一页</span></a>";
+                            pageHtml += "<a style='cursor:pointer'><span style='margin:6px;' onclick='LoadNextPageData();'>下一页</span></a>";
+                            pageHtml += "<span id='CurrentPageNumber'><span></span><input id='pageto'autocomplete='off' type='text'></span>";
+                            pageHtml += "<span id='TotalPageNumber'></span>";
+                            pageHtml += "</div>";
+                            $('#div_content').append(pageHtml);
+
+                            $('#pageto').keyup(function (e) {
+                                if (e.keyCode == '13') {
+                                    var page = $(this).val()
+                                    LoadInfo.contentList(Number(page) - 1);
+                                }
+                            })
+
+                            $('#CurrentPageNumber span').text("当前页：");
+                            $('#CurrentPageNumber input').val(Number(Number(pageNumber)));
+                            $('#TotalPageNumber').text(" 总页数：" + totalPages);
+
+                            
+                            //LikesNum = LikesNum + 1;
+                        } else {
+
+                            LoadDataSuccess = false;
+
+                            //$('#div_content').append("<span>已经到底了！</span>");
+
+                            //$("#div_loading").hide();
+                            //$("#div_loading").html("已经到底了！");
+                        }
+                    }
+                });
+            },
+
+        };
+
+        function LoadNextPageData() {
+            if (LoadDataSuccess)
+                DataPageNumber = DataPageNumber + 1;
+
+            LoadInfo.contentList(DataPageNumber);
+        }
+
+        function LoadPrePageData() {
+            if (LoadDataSuccess && (DataPageNumber - 1) >= 0)
+                DataPageNumber = DataPageNumber - 1;
+
+            if (DataPageNumber - 1 >= 0)
+                LoadInfo.contentList(DataPageNumber);
+        }
+        var url = ''
+        var data = {}
+        $(document).ready(function () {
+            //debugger;
+            if (folderId == "") {
+                folderId = getQueryString("id");
+                if (!folderId)
+                    folderId = parentId;
+                document.getElementById("itemid").value = folderId;
+            }
+            url = '/apps/CommandProcessor.ashx?cmd=content.news.list.filter'
+            var name = getQueryString('name')
+            $('.location3name').html(name)
+            $('.location1name').html(name)
+            $('.top-location-left').html(name)
+            var ParentId = getQueryString('parentid')
+            let title_filter = getQueryString('paramsVal')
+            window.data = {
+                title_filter: title_filter,
+                srch_EndDate: '',
+                auto_filter: '',
+                businessUnit_lkid:'',
+                contentTypeCode: 1,
+                pageSize:20
+            }
+            loadMenus();
+            LoadInfo.contentList(1);
+            if (tokenStr && tokenStr != "") {
+
+                //var html=" <a href=\""+link+"\" class=\"tn-tab\" id=\"a2\">   <i style=\"padding-left: 10px;\">首页</i>    </a>";
+                //$("#homeLinkContainer").html(html);
+                //alert(tokenStr);
+            }
+        });
+
+        function loadMenus(url) {
+            $.ajax({
+                url: '/apps/CommandProcessor.ashx?cmd=itemtree.children.getlist',
+                type: 'get',
+                data: {
+                    ParentId: parentId
+                },
+                dataType: 'json',
+                async: true,
+                cache: false,
+                success: function (data) {
+                    //$('#leftNav').html(ejs.render($('#template_column').html(), data));
+                    var html = "";
+                    for (var i = 0; i < data.listData.length; i++) {
+                        var row = data.listData[i];
+                        html += "<div category_id='" + row.ItemId + "'>";
+                        html += "<li>";
+                        if (row.ItemId == folderId)
+                            html += "<a href='javascript:;' valueid='" + row.ItemId + "' class=\"nav_item active\">" + row.Name + "<img class='img1' style='width:12px;height:12px;position:absolute;' src='/portal/img/12123.png' /><img  class='img2' style='width:12px;height:12px;position:absolute;' src='/portal/img/12122.png' /></a>";
+                        else
+                            html += "<a href='javascript:;' valueid='" + row.ItemId + "' class=\"nav_item\">" + row.Name + "<img class='img1' style='width:12px;height:12px;position:absolute;' src='/portal/img/12123.png' /><img class='img2' style='width:12px;height:12px;position:absolute;' src='/portal/img/12122.png' /></a>";
+                        html += "</li>";
+                        html += "</div>";
+                    }
+                    $('#leftNav').html(html);
+                    LoadInfo.bindClick();
+                }
+            });
+        }
+    </script>
+</head>
+
+<body class="FRAME_login">
+
+  <!--头部导航-->
+        <div id="SI_Top_Wrap" class="top-nav-wrap top-nav-wrap-fix">
+            <div class="top-nav">
+                <div class="tn-bg">
+                    <div class="tn-header">
+                        <div class="tn-nav" id="div_navigation">
+                            <div class="tn-title" node-type="sethome" id="homeLinkContainer">
+                               <a href="index.html" class="tn-tab" id="a2">
+                                    <i style="padding-left: 10px;">首页</i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="main" style="overflow: visible; ">
+
+        <div class="B_unlog">
+
+            <div class="WB_miniblog">
+                <div class="WB_miniblog_fb">
+                    <div id="weibo_top_public">
+                        <!--spec start-->
+                        <!--顶部导航-->
+                        <!--spec end-->
+                    </div>
+                    <div class="WB_main clearfix" id="plc_frame">
+                        <div class="WB_frame">
+                            <!-- 左导 -->
+                            <input type="hidden" name="itemid" id="itemid" />
+                            <!--<div class="WB_main_l">
+                                <div id="pl_unlogin_home_leftnav">
+                                    <div class="UG_left_nav"  style="top: 66px; bottom: auto; position:static;">
+                                        <div class="location3name">制度文件</div>
+                                        <ul id="leftNav">
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>-->
+                            <!-- ／左导 -->
+                            
+                            <div id="plc_main" style="margin-left:150px">
+                                
+                                <div id="plc_unlogin_home_main">
+                                    <div class="WB_frame_c">
+                                        <div class="top-location">
+                                            <div class="top-location-left">行政管理</div>
+                                            <div class="top-location-right">
+                                                <img src="/portal/img/12125.png" alt="Alternate Text" />
+                                                <span>当前位置：</span>
+                                                <span>首页</span>>
+                                                <span class="location1name">行政规章制度</span>>
+                                                <span class="location2name">行政管理</span>
+                                            </div>
+                                        </div>
+                                        <div class="search">
+                                            <input type="type" name="name" value="" placeholder="大家都在搜：" />
+                                            <a class="search-btn"  href="javascript:;" onclick="getSearch(this)">
+                                                搜索
+                                            </a>
+                                        </div>
+                                        <div id="pl_unlogin_home_feed">
+                                            <!--榜单栏位置-->
+                                            <div class="UG_slider"></div>
+                                            <div class="UG_contents" id="PCD_pictext_i_v5">
+                                                <!--feed内容-->
+                                                <ul class="pt_ul clearfix" id="div_content">
+                                                </ul>
+                                            </div>
+
+                                            <div class="loadings" id="div_loading">
+                                                <img src="../js/portal/allfile/indicator_24.gif" style="margin-left: 50%;" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+    <div class="footdiv">
+            <div id="footer" class="footer" data-sudaclick="blk_footer">
+                <div class="ft-info"><a href="javascript;;">北京凤凰世纪科技有限公司</a> &nbsp;|&nbsp;<a href="http://192.168.10.31:9006" target="_blank">老OA登录</a> </div>
+        </div>
+
+    <script src="/js/tablist/main.js"></script>
+
+    <script type="text/template" id="template_column">
+       <%for(var i=0;i<listData.length;i++){ %>
+        <div category_id="0" action-type="filter_cat" suda-data="key=nologin_home&amp;value=nologin_left_hot:0" suda-uatrack="key=www_unlogin_home&amp;value=recommend">
+            <li>
+                <a href="javascript:;" valueid="<%=listData[i].ItemId%>" class="nav_item"><%=listData[i].Name%></a>
+            </li>
+        </div>
+        <%}%>
+    </script>
+
+    <script type="text/template" id="template_content">
+         
+    </script>
+
+     <script type="text/template" id="template_navigation">
+        <div class="tn-title" node-type="sethome">
+            <a href="index.html" class="tn-tab" id="a2">
+                <i style="padding-left: 10px;">首页</i>
+            </a>
+        </div>
+        <%for(var i=0;i<result.MainColumn.length;i++){ %>
+         <div class="tn-title" node-type="sethome">
+             <a href="javascript:;" class="tn-tab" id="a1">
+                 <i style="padding-left: 10px;"><%=result.MainColumn[i].Name%><em class="tn-new tn-new2" style="display: none;"></em>
+                     <%if(result.MainColumn[i].Item.length>0){%>
+                     <span class="" style="float:left;margin-left:5px;margin-top:2px;"><img style="width:12px;height:12px;" src="/portal/img/12121.png"/></span>
+                     <%}%></i>
+             </a>
+            <%if(result.MainColumn[i].Item.length>0){%>
+             <div style="display: none; z-index: 1000;" class="tn-topmenulist tn-topmenulist-a tn-topmenulist-a-client">
+                 <ul class="tn-text-list">
+                <%for(var t=0;t<result.MainColumn[i].Item.length;t++){ %>
+                        <li style="cursor: pointer;"><a href="newlist.html?parentid=<%=result.MainColumn[i].Value%>&id=<%=result.MainColumn[i].Item[t].Value%>" ><%=result.MainColumn[i].Item[t].Name%></a></li>
+                     <%}%>
+                 </ul>
+             </div>
+             <%}%>
+         </div>
+        <%}%>
+         
+    </script>
+    <script>
+        $('#leftNav li').click(function () {
+            $('#leftNav li').removeClass('cur')
+            $(this).find('a').addClass('cur')
+        })
+        function getSearch(a) {
+            let val = $('.search input').val();
+            LoadInfo.contentList(1)
+        }
+    </script>
+</body>
+</html>
