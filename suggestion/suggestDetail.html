@@ -1,0 +1,297 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>意见详情</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/cdn/vant_index.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #vueApp {
+            min-height: 100vh;
+            background: #f4f4f4;
+            padding-top: 1px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: #3399ff;
+            color: #fff;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .panel {
+            background: #fff;
+            margin-top: 20px;
+        }
+
+            .panel:first-child {
+                margin-top: 0;
+            }
+
+            .panel .headInfo {
+                display: flex;
+                align-items:center;
+                padding: 10px;
+            }
+
+        .headInfo .info {
+            flex: 1;
+            margin-left: 10px;
+        }
+        .headInfo .info .name{
+            font-size:14px;
+        }
+        .headInfo .info .depart{
+            color:#999999;
+            font-size:12px;
+        }
+        .cont {
+            padding: 10px;
+        }
+
+        .operation {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #e2e3e5;
+            font-size: 12px;
+            padding: 12px 0;
+        }
+        .comment{
+            background:#fff;
+            margin-top:10px;
+        }
+        .tabs{
+            display:flex;
+            padding:0 19px;
+        }
+        .tabs .tab{
+            width: 75px;
+            text-align: center;
+            padding: 15px 0;
+            font-size:15px;
+            font-weight:bold;
+            color:#333;
+        }
+        .tabs .tab.active{
+            color:#3399ff;
+            border-bottom:2px solid #3399ff;
+        }
+        .comment .box{
+            border-top:1px solid #e2e3e5;
+            display:flex;
+            padding: 10px 19px;
+        }
+        .comment .box .info_view{
+            margin-left:10px;
+        }
+        .comment .box .info_view .nikeName{
+            font-size:14px;
+            color:#3399ff;
+        }
+        .comment .box .info_view .content{
+            font-size:16px;
+            color:#333;
+            padding:5px 0;
+        }
+        .comment .box .info_view .time{
+            color:#644d4d;
+            font-size:12px;
+        }
+        .footer {
+            width:100%;
+            position:fixed;
+            bottom:0;
+            background:#fff;
+        }
+        .footer .filed{
+            padding:5px 19px;
+            display:flex;
+        }
+        .footer .filed input{
+            flex:1;
+            width:100%;
+            height:30px;
+            border:none;
+            outline:0;
+            font-size:12px;
+            color:#333;
+        }
+        .footer .filed button{
+            border:none;
+            width:50px;
+            height:30px;
+            line-height:30px;
+            text-align:center;
+            background:#3399ff;
+            color:#fff;
+            border-radius:3px;
+        }
+        .likeView{
+            display:flex;
+            align-items:center;
+            padding:10px 19px;
+            border-top:1px solid #e2e3e5;
+        }
+        .likeView .info{
+            margin-left:10px;
+        }
+        .likeView .info .name{
+            font-size:14px;
+            color:#3399ff;
+        }
+        .likeView .info .time{
+            font-size: 12px;
+            color: #644d4d;
+        }
+    </style>
+</head>
+<body>
+    <div id="vueApp">
+        <div class="panel">
+            <div class="headInfo">
+                <div class="avatar">{{info.name}}</div>
+                <div class="info">
+                    <p class="name">{{info.OwningUserName}}</p>
+                    <p class="depart">
+                        {{info.BuidingName}} {{info.CreatedOn}}
+                    </p>
+                    <p class="more"></p>
+                </div>
+            </div>
+            <div class="cont">
+                {{info.Description}}
+            </div>
+        </div>
+        <div class="comment">
+            <div class="tabs">
+                <p class="tab" :class="{active:idx==0}" @click="handleTab(0)">评论</p>
+                <p class="tab" :class="{active:idx==1}" @click="handleTab(1)">赞</p>
+            </div>
+            <div class="box" v-for="(item,index) in commentList" :key="index" v-if="idx==0">
+                <div class="avatar">{{item.name}}</div>
+                <div class="info_view">
+                    <p class="nikeName">{{item.CreatedByName}}</p>
+                    <p class="content">{{item.Comment}}</p>
+                    <p class="time">{{item.DeptName}} {{item.CreatedOn}}</p>
+                </div>
+                <div class="like_icon"></div>
+            </div>
+            <div class="likeView" v-for="(item,index) in likeList" :key="index" v-if="idx==1">
+                <div class="avatar">{{itemm.name}}</div>
+                <div class="info">
+                    <p class="name">{{item.CreatedByName}}</p>
+                    <p class="time"> {{item.CreatedOn}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer" v-if="idx==0">
+            <div class="filed">
+                <input type="type" name="name" v-model="comment" placeholder="输入评论" />
+                <button @click="getSend">发送</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="/js/vue/vue.js"></script>
+<script src='/cdn/jquery.min.js'></script>
+<script src=' /mui/dist/js/sm.js'></script>
+<script src=' /mui/dist/js/sm-extend.js'></script>
+<script src="/cdn/vue.min.js"></script>
+<script src="/cdn/vant.min.js"></script>
+<script src="/cdn/axios.min.js"></script>
+<script src="/cdn/qs.min.js"></script>
+<script src="/js/CommonUtils.js"></script>
+<script>
+    var vue = new Vue({
+        el: '#vueApp',
+        data() {
+            return {
+                idx: 0,
+                sessionKey: '',
+                id: '',
+                info: {},
+                commentList: [],
+                comment: "",
+                likeList:[]
+            }
+        },
+        created(){
+            this.sessionKey = getQueryVariable('sessionKey');
+            this.id = getQueryVariable('id');
+            this.getQuery();
+            this.getComment();
+        },
+        methods: {
+            getQuery(){
+                axios({
+                    method:'get',
+                    url: '/rest?method=chatter.status.get&sessionKey='+this.sessionKey+'&id='+this.id
+                }).then(res=> {
+                    this.info = res.data.listData[0];
+                    if (this.info!='') {
+                        this.info.name = setSlice(this.info.OwningUserName);
+                    }
+                    response = res;
+                })
+            },
+            getComment(){
+                axios({
+                    method: 'get',
+                    url: '/rest?method=chatter.commentme.getlist&sessionKey=' + this.sessionKey + '&CommentId=' + this.id + '&scope=Comment&objTypeCode=6000&pageNumber=' + '1' + '&PageSize='+100
+                }).then(res=> {
+                    this.commentList = res.data.listData;
+                    this.commentList.map(item=> {
+                        item.name = setSlice(item.CreatedByName);
+                        return item;
+                    })
+                })
+            },
+            getLikeQuery(){
+                axios({
+                    method: 'get',
+                    url: '/rest?method=object.likes.getlist&sessionKey=' + this.sessionKey + '&id=' + this.id
+                }).then(res=> {
+                    this.likeList = res.data.listData;
+                    this.likeList.map(item=> {
+                        item.name = setSlice(item.CreatedByName);
+                        return item;
+                    })
+                })
+            },
+            handleTab(idx) {
+                this.idx = idx;
+                if (idx == 0) {
+                    this.getComment();
+                } else {
+                    this.getLikeQuery();
+                }
+            },
+            getSend() {
+                if(this.comment!='')
+                axios({
+                    method: 'get',
+                    url: '/rest?method=object.comment.add&sessionKey=' + this.sessionKey + '&objectid=' + this.id + '&comments=' + this.comment + '&objTypeCode=6000'
+                }).then(res=> {
+                    this.comment = '';
+                    this.getComment();
+                })
+                else 
+                    this.$toast('内容不能为空');
+                    return false;
+            }
+        }
+    })
+    Vue.use(vant.Toast);
+</script>
+</html>
